@@ -25,7 +25,7 @@ exports.getAllTours = async (req, res) => {
       const sortBy = req.query.sort.split(",").join(" ");
       query = query.sort(sortBy);
     } else {
-      query = query.sort("-createdAt");
+      query = query.sort("_id");
     }
 
     // 3. Field limiting
@@ -36,14 +36,24 @@ exports.getAllTours = async (req, res) => {
       query = query.select("-__v");
     }
 
+    // 4. Pagination
+    // const page = req.query.page * 1 || 1;
+    const page = parseInt(req.query.page) || 1;
+    // const page = req.query.page ? +req.query.page : 1;
+    // const limit = req.query.limit * 1 || 100;
+    const limit = parseInt(req.query.limit) || 100;
+    // const limit = req.query.limit ? +req.query.limit * 1 : 100;
+    const skip = (page - 1) * limit;
+
+    query = query.skip(skip).limit(limit);
+
+    if (req.query.page) {
+      const numTours = await Tour.countDocuments();
+      if (skip >= numTours) throw new Error("This page does not exist!");
+    }
+
     // Execute query
     const tours = await query;
-
-    // const query = Tour.find()
-    //   .where("duration")
-    //   .equals(5)
-    //   .where("difficulty")
-    //   .equals("easy");
 
     // Send response
     res.status(200).json({
@@ -56,7 +66,7 @@ exports.getAllTours = async (req, res) => {
   } catch (err) {
     res.status(404).json({
       status: "fail",
-      message: err,
+      message: err.message,
     });
   }
 };
