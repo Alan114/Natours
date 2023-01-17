@@ -1,3 +1,10 @@
+const AppError = require("./../utils/appError");
+
+const handleCastErrorDB = (err) => {
+  const message = `Invalid ${err.path}: ${err.value}`;
+  return new AppError(message, 400);
+};
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -35,6 +42,14 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === "development") {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === "production") {
-    sendErrorProd(err, res);
+    // let error = { ...err };
+    // In later versions of mongoose the name property of CastError is not an enumerable
+    // and using { ...err } to destructure will do a shallow copy and will copy only enumerable properties
+    // and since the name is no more an enumerable property it doesn't get copied !!!
+    let error = Object.create(err);
+
+    if (error.name === "CastError") error = handleCastErrorDB(error);
+
+    sendErrorProd(error, res);
   }
 };
