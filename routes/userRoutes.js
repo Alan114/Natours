@@ -6,10 +6,10 @@ const router = express.Router();
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
 
-router
-  .route("/")
-  .get(userController.getAllUsers)
-  .post(userController.createUser);
+router.post("/forgotPassword", authController.fogotPassword);
+router.post("/resetPassword", authController.resetPassword);
+
+router.route("/").get(userController.getAllUsers).post(userController.createUser);
 
 router
   .route("/:id")
