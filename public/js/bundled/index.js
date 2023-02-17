@@ -560,10 +560,12 @@ function hmrAccept(bundle, id) {
 var _polyfill = require("@babel/polyfill");
 var _mapbox = require("./mapbox");
 var _login = require("./login");
+var _updateSettings = require("./updateSettings");
 // DOM Elements
 const mapBox = document.getElementById("map");
 const loginForm = document.querySelector(".form--login");
 const logOutBtn = document.querySelector(".nav__el--logout");
+const userDataForm = document.querySelector(".form-user-data");
 // Delegation
 if (mapBox) {
     const locations = JSON.parse(mapBox.dataset.locations);
@@ -576,8 +578,14 @@ if (loginForm) loginForm.addEventListener("submit", (e)=>{
     (0, _login.login)(email, password);
 });
 if (logOutBtn) logOutBtn.addEventListener("click", (0, _login.logout));
+if (userDataForm) userDataForm.addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    (0, _updateSettings.updateData)(name, email);
+});
 
-},{"./login":"7yHem","@babel/polyfill":"dTCHC","./mapbox":"3zDlz"}],"7yHem":[function(require,module,exports) {
+},{"./login":"7yHem","@babel/polyfill":"dTCHC","./mapbox":"3zDlz","./updateSettings":"l3cGY"}],"7yHem":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "login", ()=>login);
@@ -11796,6 +11804,29 @@ const displayMap = (locations)=>{
     map.fitBounds(bounds);
 };
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["hTzJ5","f2QDv"], "f2QDv", "parcelRequire11c7")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"l3cGY":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "updateData", ()=>updateData);
+var _axios = require("axios");
+var _axiosDefault = parcelHelpers.interopDefault(_axios);
+var _alerts = require("./alerts");
+const updateData = async (name, email)=>{
+    try {
+        const res = await (0, _axiosDefault.default)({
+            method: "PATCH",
+            url: "http://127.0.0.1:3000/api/v1/users/updateMe",
+            data: {
+                name,
+                email
+            }
+        });
+        if (res.data.status === "success") (0, _alerts.showAlert)("success", "Data updated successfully!");
+    } catch (err) {
+        (0, _alerts.showAlert)("error", err.response.data.message);
+    }
+};
+
+},{"axios":"jo6P5","./alerts":"6Mcnf","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["hTzJ5","f2QDv"], "f2QDv", "parcelRequire11c7")
 
 //# sourceMappingURL=index.js.map
